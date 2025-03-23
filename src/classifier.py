@@ -5,18 +5,18 @@ import logging
 
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, classification_report
-from sklearn.model_selection import GridSearchCV
+from sklearn.metrics import accuracy_score
+from sklearn.metrics import roc_auc_score, average_precision_score
 
 from tsfresh import extract_features
-from tsfresh.feature_extraction import ComprehensiveFCParameters
+from tsfresh.feature_extraction import ComprehensiveFCParameters, EfficientFCParameters
 
 def extract_last_features(df):
     return df.groupby('RecordID').last().reset_index()
 
 def extract_tsfresh_features(df):
     # Define the settings for feature extraction
-    extraction_settings = ComprehensiveFCParameters()
+    extraction_settings = EfficientFCParameters()
     
     # Extract features using tsfresh
     features = extract_features(df, column_id='RecordID', column_sort='Time', default_fc_parameters=extraction_settings)
@@ -26,45 +26,113 @@ def extract_tsfresh_features(df):
     
     return features
 
+def logistic_regression(training_X, training_Y, validation_X, validation_Y, randomstate=42 ) -> LogisticRegression:
+    C_values = [0.01, 0.1, 1, 10, 100]
+    penalties = ['l1', 'l2']
+
+    best_accuracy = 0.0
+    best_params = {}
+    best_model = None
+
+    # Loop through each combination of hyperparameters
+    for C in C_values:
+        for penalty in penalties:
+            # l1 penalty is only supported by some solvers; here we use 'liblinear'
+
+            model = LogisticRegression(
+                C=C, 
+                penalty=penalty,
+                solver='liblinear',
+                max_iter=100,
+                random_state=randomstate
+            )
+            model.fit(training_X, training_Y)
+            
+            # Predict on the validation set
+            predictions = model.predict(validation_X)
+            accuracy = accuracy_score(validation_Y, predictions)
+            #print(f"Validation accuracy for C={C}, penalty='{penalty}': {accuracy:.4f}")
+            
+            # Save best model based on validation accuracy
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_params = {'C': C, 'penalty': penalty}
+                best_model = model
+    return best_model
+
+def random_forest(training_X, training_Y, validation_X, validation_Y, randomstate=42) -> RandomForestClassifier:
+    # Define a grid of hyperparameters to search over
+    n_estimators_values = [50, 100, 200]
+    max_depth_values = [None, 5, 10]
+
+    best_accuracy = 0.0
+    best_params = {}
+    best_model = None
+
+    # Loop through each combination of hyperparameters
+    for n_estimators in n_estimators_values:
+        for max_depth in max_depth_values:
+            model = RandomForestClassifier(
+                n_estimators=n_estimators,
+                max_depth=max_depth,
+                random_state=randomstate
+            )
+            model.fit(training_X, training_Y)
+            
+            # Predict on the validation set
+            predictions = model.predict(validation_X)
+            accuracy = accuracy_score(validation_Y, predictions)
+            print(f"Validation accuracy for n_estimators={n_estimators}, max_depth={max_depth}: {accuracy:.4f}")
+            
+            # Save best model based on validation accuracy
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                best_params = {'n_estimators': n_estimators, 'max_depth': max_depth}
+                best_model = model
+    
+    return best_model
+
+def get_results(model, test_X, test_Y):
+    # Predict on the test set
+    test_predictions = model.predict(test_X)
+    logging.info(f"Test Accuracy: {accuracy_score(test_Y, test_predictions)}")
+    # Calculate AUROC
+    auroc = roc_auc_score(test_Y, test_predictions)
+    logging.info(f"Test AUROC: {auroc}")
+    # Calculate AUPRC
+    auprc = average_precision_score(test_Y, test_predictions)
+    logging.info(f"Test AUPRC: {auprc}")
+
 if __name__ == '__main__':
     randomstate = 42
 
-    logging.basicConfig(filename=os.path.join('logs', 'model_training_tsfresh.log'), level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+    logging.basicConfig(filename=os.path.join('logs', f'model_training_{pd.Timestamp.now().strftime("%Y%m%d_%H%M%S")}.log'), level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
     
-    X = pd.read_parquet(os.path.join('loaded_data', 'a_patient_data_processed.parquet'), index=False)
-    training_X = extract_tsfresh_features(X).drop(columns=['In-hospital_death', 'Time', 'RecordID'])
-    
-    training_Y = extract_tsfresh_features(X)['In-hospital_death']
+    # choose feature extraction method
+    feature_extractor = extract_tsfresh_features 
+    logging.info(f"Using feature extractor: {feature_extractor.__name__}")
 
-    X_val = pd.read_parquet(os.path.join('loaded_data', 'b_patient_data_processed.parquet'), index=False)
-    
-    validation_X = extract_tsfresh_features(X_val).drop(columns=['In-hospital_death', 'Time', 'RecordID'])
-    logging.info(f'Validation X columns: {validation_X.columns}')
-    validation_Y = extract_tsfresh_features(X_val)['In-hospital_death']
+    set_a = pd.read_parquet(os.path.join('loaded_data', 'a_patient_data_processed.parquet'))
+    training_X = feature_extractor(set_a).drop(columns=['In-hospital_death', 'Time', 'RecordID'])
+    training_Y = feature_extractor(set_a)['In-hospital_death']
+
+    set_b = pd.read_parquet(os.path.join('loaded_data', 'b_patient_data_processed.parquet'))
+    validation_X = feature_extractor(set_b).drop(columns=['In-hospital_death', 'Time', 'RecordID'])
+    validation_Y = feature_extractor(set_b)['In-hospital_death']
+
+    set_c = pd.read_parquet(os.path.join('loaded_data', 'c_patient_data_processed.parquet'))
+    test_X = feature_extractor(set_c).drop(columns=['In-hospital_death', 'Time', 'RecordID'])
+    test_Y = feature_extractor(set_c)['In-hospital_death']
 
     logging.info(f"Training X shape: {training_X.shape}")
     logging.info(f"Training Y shape: {training_Y.shape}")
     logging.info(f"Validation X shape: {validation_X.shape}")
     logging.info(f"Validation Y shape: {validation_Y.shape}")
+    logging.info(f"Test X shape: {test_X.shape}")
+    logging.info(f"Test Y shape: {test_Y.shape}")
 
-    # Hyperparameter tuning for Logistic Regression
-    log_reg = LogisticRegression(random_state=randomstate)
-    log_reg_params = {'C': [0.01, 0.1, 1, 10, 100], 'solver': ['liblinear', 'lbfgs']}
-    log_reg_grid = GridSearchCV(log_reg, log_reg_params, cv=5, scoring='accuracy')
-    log_reg_grid.fit(training_X, training_Y)
-    log_reg_best = log_reg_grid.best_estimator_
-    log_reg_predictions = log_reg_best.predict(validation_X)
-    logging.info(f"Best Logistic Regression Params: {log_reg_grid.best_params_}")
-    logging.info(f"Logistic Regression Accuracy: {accuracy_score(validation_Y, log_reg_predictions)}")
-    logging.info(f"Logistic Regression Classification Report:\n{classification_report(validation_Y, log_reg_predictions)}")
+    logistic_model = logistic_regression(training_X, training_Y, validation_X, validation_Y)
+    get_results(logistic_model, test_X, test_Y)
 
-    # Hyperparameter tuning for Random Forest
-    rf = RandomForestClassifier(random_state=randomstate)
-    rf_params = {'n_estimators': [50, 100, 200], 'max_depth': [None, 10, 20, 30]}
-    rf_grid = GridSearchCV(rf, rf_params, cv=5, scoring='accuracy')
-    rf_grid.fit(training_X, training_Y)
-    rf_best = rf_grid.best_estimator_
-    rf_predictions = rf_best.predict(validation_X)
-    logging.info(f"Best Random Forest Params: {rf_grid.best_params_}")
-    logging.info(f"Random Forest Accuracy: {accuracy_score(validation_Y, rf_predictions)}")
-    logging.info(f"Random Forest Classification Report:\n{classification_report(validation_Y, rf_predictions)}")
+    rf_model = random_forest(training_X, training_Y, validation_X, validation_Y)
+    get_results(rf_model, test_X, test_Y)

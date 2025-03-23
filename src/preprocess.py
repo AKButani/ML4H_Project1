@@ -74,10 +74,9 @@ if __name__ == "__main__":
 
     mean, std = 0, 1
 
-    for folder in ['a', 'b']:
+    for folder in ['a', 'b', 'c']:
         print("Loading files")
         patient_df = combine_files_in_folder(os.path.join('data', 'set-' + folder))
-        patient_df.to_parquet(os.path.join('loaded_data', 'b_patient_data.parquet'))
 
         outcomes_df = pd.read_csv(os.path.join('data', f'Outcomes-{folder}.txt'), sep=',')
         outcomes_df = outcomes_df[['RecordID', 'In-hospital_death']]
