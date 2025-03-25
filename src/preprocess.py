@@ -50,8 +50,28 @@ def combine_files_in_folder(folder_path):
     
     return combined_df
 
+def address_special_cases(patient_df):
+    # gender
+    
+    patient_df.loc[~((patient_df['Gender'] == 0) | (patient_df['Gender']== 1)), 'Gender'] = np.nan
+
+    # Temperature
+    patient_df.loc[(patient_df['Temp'] < 28) | (patient_df['Temp'] > 46), 'Temp'] = np.nan
+
+    # MechVent
+    # Replace NaN values in 'MechVent' column with 0
+    patient_df['MechVent'] = patient_df['MechVent'].fillna(0)
+
+    # Weight
+    patient_df.loc[(patient_df['Weight'] < 5)] = np.nan
+
+    # Height
+    patient_df.loc[(patient_df['Height'] < 25)| (patient_df['Height'] > 220)] = np.nan
+    return patient_df
+
 def fill_null_values(df, groupby_col):
     cols_to_ffill = [col for col in df.columns if col != groupby_col]
+    df.sort_values(by=['Time'], inplace=True)
     df_imputed = df.copy().groupby(groupby_col)[cols_to_ffill].apply(lambda group: group.ffill())
 
     numeric_cols = df_imputed.select_dtypes(include=['number']).columns
@@ -70,6 +90,8 @@ def scale_values(df, scaler=None):
         scaler = StandardScaler()
         df_scaled[numeric_cols] = scaler.fit_transform(df_scaled[numeric_cols])
     return df_scaled, scaler
+
+
 if __name__ == "__main__":
 
     mean, std = 0, 1
@@ -78,6 +100,8 @@ if __name__ == "__main__":
         print("Loading files")
         patient_df = combine_files_in_folder(os.path.join('data', 'set-' + folder))
 
+        patient_df = address_special_cases(patient_df)
+        
         outcomes_df = pd.read_csv(os.path.join('data', f'Outcomes-{folder}.txt'), sep=',')
         outcomes_df = outcomes_df[['RecordID', 'In-hospital_death']]
         
@@ -97,7 +121,7 @@ if __name__ == "__main__":
         print("Saving processed files")
         #Order columns alphabetically
         patient_df_scaled = patient_df_scaled.reindex(sorted(patient_df_scaled.columns), axis=1)
-        patient_df_scaled.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_processed.parquet'), index=False)
+        patient_df_scaled.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_processed_2.parquet'), index=False)
 
 
 
