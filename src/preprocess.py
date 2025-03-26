@@ -19,8 +19,25 @@ def process_file(file_path):
     # Drop rows corresponding to fixed parameters and ICUType as they're not needed for pivoting
     df = df[~df["Parameter"].isin(fixed_parameters)]
     
+    # Define custom aggregation functions
+    agg_funcs = {
+        'Urine': 'sum',
+        # Add other parameters and their respective aggregation functions here
+    }
+    
+    # Default aggregation function
+    default_agg_func = 'first'
+    
+    # Create a custom aggregation function
+    def custom_agg_func(series):
+        param = series.name
+        if (param in agg_funcs):
+            return series.agg(agg_funcs[param])
+        else:
+            return series.agg(default_agg_func)
+    
     # Pivot the DataFrame so that each time point becomes a row and Parameters become columns
-    df_pivot = pd.pivot_table(df, index='Time', columns='Parameter', values='Value', aggfunc='first')
+    df_pivot = df.pivot_table(index='Time', columns='Parameter', values='Value', aggfunc=custom_agg_func)
     df_pivot = df_pivot.reset_index()
     
     # Add fixed values (e.g. RecordID, Age, etc.) as constant columns in each pivoted DataFrame
