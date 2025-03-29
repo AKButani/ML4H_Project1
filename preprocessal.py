@@ -19,7 +19,7 @@ def process_file(file_path):
     df = df[~df["Parameter"].isin(fixed_parameters)]
     
     # Pivot the DataFrame
-    df_pivot = pd.pivot_table(df, index='Time', columns='Parameter', values='Value', aggfunc='first').reset_index()
+    df_pivot = pd.pivot_table(df, index='Time', columns='Parameter', values='Value', aggfunc=lambda x: x.sum() if x.name == 'Urine' else x.mean()).reset_index()
     
     # Add fixed values
     for param, value in fixed_values.items():
@@ -80,4 +80,4 @@ if __name__ == "__main__":
         patient_df_scaled = patient_df_scaled.merge(outcomes_df, on='RecordID', how='inner')
         print("Saving processed files")
         patient_df_scaled = patient_df_scaled.reindex(sorted(patient_df_scaled.columns), axis=1)
-        patient_df_scaled.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_processed_2.parquet'), index=False)
+        patient_df_scaled.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_processed_3.parquet'), index=False)
