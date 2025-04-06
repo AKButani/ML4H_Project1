@@ -11,11 +11,12 @@ from tensorflow.keras.optimizers import Adam
 from tensorflow.keras.callbacks import EarlyStopping
 import pyarrow  # Required for saving parquet files
 from sklearn.utils import class_weight
+from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 import random
-seed = 42 # Set the seed for reproducibility
-np.random.seed(seed) # For NumPy (if you use NumPy anywhere)
-random.seed(seed) # For Python's built-in random module (if you use it anywhere)
+seed = 42  # Set the seed for reproducibility
+np.random.seed(seed)  # For NumPy (if you use NumPy anywhere)
+random.seed(seed)  # For Python's built-in random module (if you use it anywhere)
 
 # Load the datasets
 def load_datasets():
@@ -23,23 +24,21 @@ def load_datasets():
     test_set = pd.read_parquet('loaded_data/c_patient_data_processed_cluster.parquet')
     return train_set, test_set
 
-# Prepare data for LSTM
 def prepare_lstm_data(df, target_column, time_column='Time'):
     if 'ICUType' in df.columns:
         df = df.drop(columns=['ICUType'])
 
-    grouped = df.groupby(['RecordID', time_column])
     X, y = [], []
-    
-    for (patient_id, time_point), group in grouped:
+    for patient_id, group in df.groupby('RecordID'):
+        group = group.sort_values(time_column)
         features = group.drop(columns=[target_column, 'RecordID', time_column]).values
-        target = group[target_column].values[0]
+        target = group[target_column].iloc[0]
         X.append(features)
         y.append(target)
     
-    X = np.array(X)
-    y = np.array(y)
-    return X, y
+    # Pad sequences so that all sequences have the same length
+    X_padded = pad_sequences(X, padding='post', dtype='float32')
+    return X_padded, np.array(y)
 
 # Create Unidirectional LSTM Model
 def create_lstm_model(input_shape):
@@ -105,19 +104,21 @@ def main():
         classes=np.unique(y_train),
         y=y_train
     )
-    #class_weight_dict = {0: class_weights[0], 1: class_weights[1]}
+    # Alternatively, manually set class weights
     class_weight_dict = {0: 1.0, 1: 5.0}  # Penalize misclassifying deaths 5x more
     print("Class weights:", class_weight_dict)
 
-    unidirectional_model = create_lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))
-    #early_stopping = EarlyStopping(patience=5, restore_best_weights=True)
+    # Define early stopping callback
+    early_stopping = EarlyStopping(monitor='val_loss', patience=5, restore_best_weights=True)
 
+    unidirectional_model = create_lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))
+    
     unidirectional_history = unidirectional_model.fit(
         X_train, y_train,
         validation_split=0.2,
         epochs=50,
         batch_size=32,
-        #callbacks=[early_stopping],
+        callbacks=[early_stopping],
         class_weight=class_weight_dict
     )
 
@@ -146,15 +147,13 @@ def main():
 
     plot_training_history(unidirectional_history, 'Unidirectional LSTM')
 
-    #compute_feature_importance(unidirectional_model, X_train[:50])
-
     bidirectional_model = create_bidirectional_lstm_model(input_shape=(X_train.shape[1], X_train.shape[2]))
     bidirectional_history = bidirectional_model.fit(
         X_train, y_train,
         validation_split=0.2,
         epochs=50,
         batch_size=32,
-        #callbacks=[early_stopping],
+        callbacks=[early_stopping],
         class_weight=class_weight_dict
     )
 
@@ -179,7 +178,6 @@ def main():
     df_predictions_bi.to_parquet("bidirectional_predictions.parquet", index=False)
     print("Predictions saved to 'bidirectional_predictions.parquet'")
 
-        
     tn, fp, fn, tp = confusion_matrix(y_test, y_pred_bi).ravel()
     print(f"True Positives with bidirectional (Deaths correctly predicted): {tp}")
     print(f"False Negatives with bidirectional (Deaths incorrectly predicted): {fn}")
