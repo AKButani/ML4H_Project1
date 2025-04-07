@@ -183,6 +183,7 @@ def scale_value_triplets_category_wise(df, scalers=None):
 if __name__ == "__main__":
     training_folder_path = os.path.join('data', 'set-a')
     test_folder_path = os.path.join('data', 'set-c')
+    
     variable_mapping = get_variable_mapping_multiple([training_folder_path, test_folder_path])
     scaler = None
     for folder in ['a', 'b', 'c']:
