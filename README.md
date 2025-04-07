@@ -2,6 +2,8 @@
 
 How to run the scripts:
 
+We have a requirements.txt file 
+
 EXERCISE 1
 - src/preprocessal.py: Note that you may need to change the folder and outcome paths to load the data correctly.
 - data_exploration.ipynb
