@@ -1,0 +1,52 @@
+2025-04-06 19:50:40,703 - INFO - Using feature extractor: extract_last_features
+2025-04-06 19:50:41,153 - INFO - Training X shape: (3997, 40)
+2025-04-06 19:50:41,154 - INFO - Training Y shape: (3997,)
+2025-04-06 19:50:41,154 - INFO - Validation X shape: (3993, 40)
+2025-04-06 19:50:41,154 - INFO - Validation Y shape: (3993,)
+2025-04-06 19:50:41,154 - INFO - Test X shape: (3998, 40)
+2025-04-06 19:50:41,154 - INFO - Test Y shape: (3998,)
+2025-04-06 19:50:41,168 - INFO - Training X:               ALP       ALT       AST       Age   Albumin  ...  TroponinT     Urine       WBC    Weight        pH
+RecordID                                                   ...                                                   
+132539.0 -0.13892 -0.123519 -0.118468 -0.596605  0.009690  ...  -0.146278  0.830447 -0.477987 -0.120163 -0.013711
+132540.0 -0.13892 -0.123519 -0.118468  0.667031  0.009690  ...  -0.146278  0.501009  0.120932 -0.076606 -0.017041
+132541.0  0.24178 -0.025480  0.067062 -1.170985 -1.906911  ...  -0.146278 -0.514759 -0.969407 -1.161171 -0.000390
+132543.0  0.24178 -0.165854 -0.167209  0.207527  3.842893  ...  -0.146278  2.312920 -0.708340  0.054064 -0.013711
+132545.0 -0.13892 -0.123519 -0.118468  1.356287  0.831091  ...  -0.146278 -0.267680 -1.184403 -0.120163 -0.013711
+
+[5 rows x 40 columns]
+2025-04-06 19:50:41,180 - INFO - Training Y: RecordID
+132539.0    0
+132540.0    0
+132541.0    0
+132543.0    0
+132545.0    0
+Name: In-hospital_death, dtype: int64
+2025-04-06 19:50:52,926 - INFO - Best model parameters: {'C': 0.01, 'penalty': 'l2', 'max_iter': 100}
+2025-04-06 19:50:52,926 - INFO - Model parameters:
+2025-04-06 19:50:52,926 - INFO - {'memory': None, 'steps': [('classifier', LogisticRegression(C=0.01, class_weight={0: 1, 1: 6.5}, n_jobs=-1,
+                   random_state=42, solver='saga'))], 'transform_input': None, 'verbose': False, 'classifier': LogisticRegression(C=0.01, class_weight={0: 1, 1: 6.5}, n_jobs=-1,
+                   random_state=42, solver='saga'), 'classifier__C': 0.01, 'classifier__class_weight': {0: 1, 1: 6.5}, 'classifier__dual': False, 'classifier__fit_intercept': True, 'classifier__intercept_scaling': 1, 'classifier__l1_ratio': None, 'classifier__max_iter': 100, 'classifier__multi_class': 'deprecated', 'classifier__n_jobs': -1, 'classifier__penalty': 'l2', 'classifier__random_state': 42, 'classifier__solver': 'saga', 'classifier__tol': 0.0001, 'classifier__verbose': 0, 'classifier__warm_start': False}
+2025-04-06 19:50:52,926 - INFO - [[ 0.14650164 -0.00800982  0.02184207  0.39903272 -0.15311691  0.42577761
+   0.25647117 -0.02803792 -0.08565145 -0.02027769  0.11753162 -0.91721958
+  -0.03108578  0.20473421 -0.05401031  0.04035151  0.20268349 -0.00107513
+  -0.05751062  0.19261547 -0.03319794 -0.04363703 -0.00817932 -0.11725498
+   0.05610919 -0.03781716  0.07221849  0.04061624  0.1237232   0.07432003
+   0.06883479 -0.05038243  0.01709042 -0.22071316  0.07208148 -0.00213079
+  -0.10984149  0.05912189 -0.20982712 -0.05586334]]
+2025-04-06 19:50:52,926 - INFO - Logistic Regression model trained
+2025-04-06 19:50:52,930 - INFO - Test Accuracy: 0.772136068034017
+2025-04-06 19:50:52,930 - INFO - Test AUROC: 0.7673913968962314
+2025-04-06 19:50:52,930 - INFO - Test AUPRC: 0.31339273367565473
+2025-04-06 19:50:52,930 - INFO - True Negatives: 2642
+2025-04-06 19:50:52,930 - INFO - False Positives: 771
+2025-04-06 19:50:52,930 - INFO - False Negatives: 140
+2025-04-06 19:50:52,930 - INFO - True Positives: 445
+2025-04-06 19:51:11,552 - INFO - Best model parameters: {'n_estimators': 300, 'max_depth': 5}
+2025-04-06 19:51:11,558 - INFO - Random Forest model trained
+2025-04-06 19:51:11,596 - INFO - Test Accuracy: 0.7973986993496749
+2025-04-06 19:51:11,596 - INFO - Test AUROC: 0.7602334963600713
+2025-04-06 19:51:11,604 - INFO - Test AUPRC: 0.3210093870077708
+2025-04-06 19:51:11,604 - INFO - True Negatives: 2774
+2025-04-06 19:51:11,604 - INFO - False Positives: 639
+2025-04-06 19:51:11,604 - INFO - False Negatives: 171
+2025-04-06 19:51:11,604 - INFO - True Positives: 414
