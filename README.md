@@ -1,4 +1,4 @@
-
+This code was developed by: Niklas Canova, Arjun Butani and Maria Romeiro Santos
 
 How to run the scripts:
 
