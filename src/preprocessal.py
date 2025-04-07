@@ -68,9 +68,13 @@ if __name__ == "__main__":
     mean, std = 0, 1
     for folder in ['a', 'b', 'c']:
         print("Loading files")
-        patient_df = combine_files_in_folder(os.path.join('data', 'set-' + folder))
+
+        file_path = os.path.join('data', 'set-' + folder)
+        outcome_path = os.path.join('data', 'Outcomes-' + folder + '.txt')
+
+        patient_df = combine_files_in_folder(file_path)
         patient_df = address_special_cases(patient_df)
-        outcomes_df = pd.read_csv(os.path.join('data', f'Outcomes-{folder}.txt'), sep=',')[['RecordID', 'In-hospital_death']]
+        outcomes_df = pd.read_csv(outcome_path, sep=',')[['RecordID', 'In-hospital_death']]
         print("Processing files")
         patient_df_imputed = fill_null_values(patient_df, 'RecordID')
         
