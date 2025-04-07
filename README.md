@@ -2,6 +2,10 @@
 
 How to run the scripts:
 
+EXERCISE 2
+
+- 2.2 (LSTM): Q2p2.py
+
 EXERCISE 4
 
 - 4.1 - Run Q4.1.ipynb
