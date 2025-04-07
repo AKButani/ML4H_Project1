@@ -73,11 +73,15 @@ if __name__ == "__main__":
         outcomes_df = pd.read_csv(os.path.join('data', f'Outcomes-{folder}.txt'), sep=',')[['RecordID', 'In-hospital_death']]
         print("Processing files")
         patient_df_imputed = fill_null_values(patient_df, 'RecordID')
+        
+        patient_df_imputed = patient_df_imputed.merge(outcomes_df, on='RecordID', how='inner')
+        patient_df_imputed.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_NOT_scaled.parquet'), index=False)
+
         if folder == 'a':
             patient_df_scaled, scaler = scale_values(patient_df_imputed)
         else:
             patient_df_scaled, _ = scale_values(patient_df_imputed, scaler)
-        patient_df_scaled = patient_df_scaled.merge(outcomes_df, on='RecordID', how='inner')
+        
         print("Saving processed files")
         patient_df_scaled = patient_df_scaled.reindex(sorted(patient_df_scaled.columns), axis=1)
-        patient_df_scaled.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_processed_3.parquet'), index=False)
+        patient_df_scaled.to_parquet(os.path.join('loaded_data', f'{folder}_patient_data_processed_cluster.parquet'), index=False)
