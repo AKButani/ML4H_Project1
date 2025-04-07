@@ -2,7 +2,7 @@ This code was developed by: Niklas Canova, Arjun Butani and Maria Romeiro Santos
 
 How to run the scripts:
 
-We have a requirements.txt file 
+We have a requirements.txt file. The embeddings folder contain the transformer embeddings from exercise 3. These can be regenerated with representation_pretraining.ipynb 
 
 EXERCISE 1
 - src/preprocessal.py: Note that you may need to change the folder and outcome paths to load the data correctly.
