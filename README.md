@@ -6,7 +6,7 @@ We have a requirements.txt file
 
 EXERCISE 1
 - src/preprocessal.py: Note that you may need to change the folder and outcome paths to load the data correctly.
-- data_exploration.ipynb
+- data_exploration.ipynb: Here the file paths may need to be adjusted as well
 
 EXERCISE 2
 - 2.1.1 src/classifier_last_timestamp.py (The logs can be seen in the logs folder)
