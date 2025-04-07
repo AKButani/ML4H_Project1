@@ -13,7 +13,7 @@ EXERCISE 2
 - 2.1.2 src/classifier_extracted_features.py (The logs can be seen in the logs folder)
 - 2.2 (LSTM): Run Q2p2.ipynb
 - 2.3a: q3_transformer.py (This is combined with a part of q3 hence the name)
-- 2.3b: Transformer_preprocess.py, Transformer_Triplets.ipynb
+- 2.3b: Transformer_preprocess.py (paths may need to be changed), Transformer_Triplets.ipynb
 
 EXERCISE 3
 - 3.1, 3.2.2, 3.3: representation_pretraining.ipynb

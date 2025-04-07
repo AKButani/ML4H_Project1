@@ -183,12 +183,15 @@ def scale_value_triplets_category_wise(df, scalers=None):
 if __name__ == "__main__":
     training_folder_path = os.path.join('data', 'set-a')
     test_folder_path = os.path.join('data', 'set-c')
-    
+
     variable_mapping = get_variable_mapping_multiple([training_folder_path, test_folder_path])
     scaler = None
     for folder in ['a', 'b', 'c']:
         print("Loading files for folder", folder)
+        
         folder_path = os.path.join('data', 'set-' + folder)
+        outcomes_path = os.path.join('data', f'Outcomes-{folder}.txt')
+
         df_triplets = combine_files_in_folder_triplets(folder_path, variable_mapping)
         df_triplets.drop(columns=['ICUType'], inplace=True, errors='ignore')
 
@@ -201,7 +204,7 @@ if __name__ == "__main__":
            # df_triplets_scaled, _ = scale_value_triplets_category_wise(df_triplets, scaler)
         
         # Load outcomes (which we assume contain RecordID and In-hospital_death)
-        outcomes_path = os.path.join('data', f'Outcomes-{folder}.txt')
+        
         outcomes_df = pd.read_csv(outcomes_path, sep=',')[['RecordID', 'In-hospital_death']]
         
         # Merge outcomes (each patient appears in many triplet rows)
