@@ -100,7 +100,7 @@ print(f"Number of RecordIDs with at least one death (1) entry: {died_record_coun
 summaries_training_df = create_summaries_from_dataset(training_df)
 
 # Save the summaries_training_df to a CSV file for later use
-summaries_training_df.to_csv('summaries_training_df.csv', index=True)
+summaries_training_df.to_csv('Q4p2/summaries_training_df.csv', index=True)
 
 # View the first few summaries
 print(summaries_training_df.head())
@@ -124,7 +124,7 @@ print(summaries_testing_df.iloc[0])
 import random
 
 # Save the summaries_training_df to a CSV file for later use
-summaries_testing_df.to_csv('summaries_testing_df.csv', index=True)
+summaries_testing_df.to_csv('Q4p2/summaries_testing_df.csv', index=True)
 
 # split the training summaries into patients who died and patients who survived
 died_positions = []
@@ -203,10 +203,10 @@ def generate_patient_descriptions(csv_file_path):
     # Return the list of patient descriptions
     return patient_texts
 
-csv_file_path_test = 'summaries_testing_df.csv'
+csv_file_path_test = 'Q4p2/summaries_testing_df.csv'
 patient_descriptions_test = generate_patient_descriptions(csv_file_path_test)
 
-csv_file_path_train = 'summaries_training_df.csv'
+csv_file_path_train = 'Q4p2/summaries_training_df.csv'
 patient_descriptions_train = generate_patient_descriptions(csv_file_path_train)
 
 # Check the result
@@ -224,7 +224,7 @@ def save_patient_descriptions_as_pkl(patient_descriptions, file_name):
 
 # Example usage:
 # Save the training descriptions to a pickle file
-save_patient_descriptions_as_pkl(patient_descriptions_train, file_name='patient_descriptions_train.pkl')
+save_patient_descriptions_as_pkl(patient_descriptions_train, file_name='Q4p2/patient_descriptions_train.pkl')
 
 # Save the test descriptions to a pickle file
-save_patient_descriptions_as_pkl(patient_descriptions_test, file_name='patient_descriptions_test.pkl')
+save_patient_descriptions_as_pkl(patient_descriptions_test, file_name='Q4p2/patient_descriptions_test.pkl')
