@@ -33,7 +33,7 @@ def process_file(file_path):
 
 def combine_files_in_folder(folder_path):
     all_files = os.listdir(folder_path)
-    all_dfs = [process_file(os.path.join(folder_path, file)) for file in all_files]
+    all_dfs = [process_file(os.path.join(folder_path, file)) for file in all_files if file.endswith('.txt')]
     return pd.concat(all_dfs, ignore_index=True)
 
 def address_special_cases(patient_df):
@@ -69,8 +69,8 @@ if __name__ == "__main__":
     for folder in ['a', 'b', 'c']:
         print("Loading files")
 
-        file_path = os.path.join('data', 'set-' + folder)
-        outcome_path = os.path.join('data', 'Outcomes-' + folder + '.txt')
+        file_path = os.path.join('ml4h_data', 'p1', 'set-' + folder)
+        outcome_path = os.path.join('ml4h_data','p1', 'Outcomes-' + folder + '.txt')
 
         patient_df = combine_files_in_folder(file_path)
         patient_df = address_special_cases(patient_df)

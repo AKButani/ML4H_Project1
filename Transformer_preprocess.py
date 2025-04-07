@@ -189,8 +189,8 @@ if __name__ == "__main__":
     for folder in ['a', 'b', 'c']:
         print("Loading files for folder", folder)
         
-        folder_path = os.path.join('data', 'set-' + folder)
-        outcomes_path = os.path.join('data', f'Outcomes-{folder}.txt')
+        folder_path = os.path.join('ml4h_data', 'p1', 'set-' + folder)
+        outcomes_path = os.path.join('ml4h_data','p1', 'Outcomes-' + folder + '.txt')
 
         df_triplets = combine_files_in_folder_triplets(folder_path, variable_mapping)
         df_triplets.drop(columns=['ICUType'], inplace=True, errors='ignore')
